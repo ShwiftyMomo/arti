@@ -1,0 +1,1 @@
+data: https://pjreddie.com/projects/mnist-in-csv/
