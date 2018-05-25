@@ -123,32 +123,13 @@ def main():
 	eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
 	print(eval_results)
 
-
-	feature_spec = {
-	    "pixels": tf.VarLenFeature(dtype=tf.float32),
-	}
-
-
-	def serving_input_receiver_fn():
-	    serialized_tf_example = tf.placeholder(dtype=tf.string, shape=[None], name='input_tensors')
-	    receiver_tensors      = {"predictor_inputs": serialized_tf_example}
-	    feature_spec          = {"words": tf.FixedLenFeature([25],tf.int64)}
-	    features              = tf.parse_example(serialized_tf_example, feature_spec)
-	    return tf.estimator.export.ServingInputReceiver(features, receiver_tensors)
-
-	mnist_classifier.export_savedmodel(
-		export_dir_base="/Users/milo/Desktop/arti/MNIST/board",
-		serving_input_receiver_fn=tf.estimator.export.build_parsing_serving_input_receiver_fn(
-		    feature_spec,
-		    default_batch_size=None
-		)
-	)
+	x = tf.feature_column.numeric_column("x")
+	feature_columns = [x]
+	feature_spec = tf.feature_column.make_parse_example_spec(feature_columns)
+	export_input_fn = tf.estimator.export.build_parsing_serving_input_receiver_fn(feature_spec)
+	dir_path = "/Users/milo/Desktop/arti/MNIST/board"
+	mnist_classifier.export_savedmodel(dir_path, export_input_fn)
 
 	os('call over felix')
-
-	'''writer = tf.summary.FileWriter("/Users/milo/Desktop/arti/MNIST/board")
-	writer.add_graph(mnist_classifier.graph)
-	saver = tf.train.Saver()
-	save_path = saver.save(mnist_classifier, "/Users/milo/Desktop/arti/MNIST/save/model.ckpt")'''
 
 main()
